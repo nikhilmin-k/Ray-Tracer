@@ -8,6 +8,7 @@ public class UtilityFunctions {
 		int blue = (int)(c0.getBlue()*0.5+c1.getBlue()*0.5);
 		return new Color(red,green,blue);
 	}
+	
 	public static String colorToString(Color c)
 	{
 		return "red: "+c.getRed()+" green: "+c.getGreen()+" blue: "+c.getBlue();

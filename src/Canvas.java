@@ -6,6 +6,8 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -44,16 +46,39 @@ public class Canvas extends JPanel implements KeyListener{
 		super.paintComponent(g2d);
 		g2d.translate(getWidth()/2, getHeight()/2);
 		g2d.scale(1, -1);
-		camera.traceEverything(height, width, image);
+		camera.traceEverything(height, width, image); //writes out all the pixels into the BufferedImage		
 		g2d.drawImage(image, null, -width/2, -height/2);
+		BufferedImage flippedImage = flipImage(image);
+		saveImage(flippedImage);
+	}
+	
+	public void saveImage(BufferedImage savedImage){ //saves image to the main directory
 		try {
 		    File outputfile = new File("rayscene.png");
-		    ImageIO.write(image, "png", outputfile);
+		    ImageIO.write(savedImage, "png", outputfile);
+		    System.out.println("image saved");
 		} catch (IOException e) {
 		    System.out.println("image failed to write to output file: ");
 		    System.out.println(e);
 		}
 	}
+	
+	public BufferedImage flipImage(BufferedImage image){ //flips image top pixels to bottom pixels using an AffineTransform
+		AffineTransform transform = AffineTransform.getTranslateInstance(0, image.getHeight());
+		AffineTransform flipVertical = AffineTransform.getScaleInstance(1,-1);
+		transform.concatenate(flipVertical); //complete flip transform
+		return createTransformed(image, transform);
+	}
+	
+	public BufferedImage createTransformed(BufferedImage image, AffineTransform transform){
+		BufferedImage transformedImage = new BufferedImage(image.getWidth(),image.getHeight(), BufferedImage.TYPE_INT_RGB);
+		Graphics2D tempGraphics = transformedImage.createGraphics();
+		tempGraphics.transform(transform);
+		tempGraphics.drawImage(image, null, 0, 0);
+		tempGraphics.dispose();
+		return transformedImage;
+	}
+	
 	@Override
 	public void keyPressed(KeyEvent arg0) {
 		if(arg0.getKeyCode()==KeyEvent.VK_UP)
